@@ -1,0 +1,7 @@
+uiautomation>=2.0
+pillow
+pyperclip
+pyautogui
+pywin32
+# 中文 OCR 引擎（RapidOCR / onnxruntime，CPU 友好，避开 Paddle oneDNN 兼容坑）
+rapidocr-onnxruntime

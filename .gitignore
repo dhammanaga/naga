@@ -1,0 +1,25 @@
+# ---- Python ----
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# ---- Runtime state / logs ----
+logs/
+debug/
+flow_state.json
+ima_state.json
+s.json
+mi.json
+ima_search.json
+@AutomationLog.txt
+
+# ---- Sensitive config (keep your real config local) ----
+config.json
+
+# ---- Debug screenshots (keep flow_static.png as the deliverable) ----
+*.png
+!flow_static.png
+
+# ---- Misc debug captures ----
+cards/
