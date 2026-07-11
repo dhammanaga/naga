@@ -105,16 +105,19 @@ class IMAController:
         # UI 文本标签（可配置，适配不同版本）
         self.labels = self.cfg.get("labels", {})
         self.input_hint_label = self.labels.get("input_hint", "有问题尽管问ima")
-        self.kb_chat_hint = self.labels.get("kb_chat_hint", "基于文件夹问答")
+        self.kb_chat_hint = self.labels.get("kb_chat_hint", "基于知识库提问")
         self.kb_chat_entries = self.cfg.get(
             "kb_chat_entries",
-            ["基于文件夹问答", "向知识库提问", "问知识库", "在知识库中提问",
-             "问答", "AI问答", "开始问答", "问问知识库", "智能问答"],
+            ["基于知识库提问", "基于文件夹问答", "向知识库提问", "问知识库",
+             "在知识库中提问", "问答", "AI问答", "开始问答", "问问知识库",
+             "智能问答", "有问题尽管问ima", "问问ima"],
         )
         self.input_hints = self.labels.get("input_hints", [])
         if not self.input_hints:
             self.input_hints = [self.input_hint_label, self.kb_chat_hint,
-                                "输入问题", "问ima", "请输入", "问知识库"]
+                                "基于知识库提问", "基于文件夹问答",
+                                "问知识库", "向知识库提问",
+                                "输入问题", "问ima", "请输入", "有问题尽管问ima"]
         # 行为参数
         self.answer_wait = float(self.cfg.get("answer_wait", 25))
         self.post_send_wait = float(self.cfg.get("post_send_wait", 2.0))
@@ -201,28 +204,73 @@ class IMAController:
         return self.hwnd
 
     def _locate_window(self):
-        for name in (self.cfg.get("window_title", ""), "ima", "IMA", "腾讯IMA", "ima.copilot"):
-            if not name:
-                continue
-            c = auto.WindowControl(Name=name)
-            if c.Exists(3):
-                self.hwnd = c.NativeWindowHandle
-                if self.hwnd:
-                    logging.info("已定位 IMA 窗口：Name=%r hwnd=%s", c.Name, self.hwnd)
+        """定位 IMA 窗口。优先用 win32gui 按标题匹配（避开 uiautomation 在
+        Electron 窗口上偶发的 COM 崩溃），失败再用 uiautomation 兜底。
+        """
+        # 1) win32gui：枚举所有顶层窗口，按标题关键字匹配
+        try:
+            candidates = []
+            title_keys = [t for t in (self.cfg.get("window_title", ""), "ima.copilot", "ima")
+                          if t]
+            if self.kb_name:
+                title_keys.append(self.kb_name)
+
+            def _enum(hwnd, _):
+                if not hwnd:
+                    return
+                try:
+                    txt = win32gui.GetWindowText(hwnd) or ""
+                except Exception:
+                    return
+                tl = txt.lower()
+                for k in title_keys:
+                    if k and k.lower() in tl:
+                        candidates.append((hwnd, txt))
+                        return
+            win32gui.EnumWindows(_enum, None)
+            # 优先精确匹配 ima.copilot / 知识库标题
+            for hwnd, txt in candidates:
+                if "ima.copilot" in txt.lower() or (self.kb_name and self.kb_name in txt):
+                    self.hwnd = hwnd
+                    logging.info("已定位 IMA 窗口（win32gui）：Name=%r hwnd=%s", txt, self.hwnd)
                     return self.hwnd
-        for w in auto.GetRootControl().GetChildren():
-            try:
-                n = (w.Name or "").lower()
-                cls = (getattr(w, "ClassName", "") or "").lower()
-                is_electron = ("chrome" in cls or "widgetwin" in cls or "electron" in cls)
-                title_ok = (n == "ima" or n == "ima.copilot" or "ima.copilot" in n)
-                if (is_electron and ("ima" in n or "copilot" in n)) or title_ok:
-                    self.hwnd = w.NativeWindowHandle
-                    logging.info("已定位 IMA 窗口（兜底）：Name=%r Class=%r hwnd=%s",
-                                 w.Name, cls, self.hwnd)
-                    return self.hwnd
-            except Exception:
-                continue
+            if candidates:
+                hwnd, txt = candidates[0]
+                self.hwnd = hwnd
+                logging.info("已定位 IMA 窗口（win32gui 兜底）：Name=%r hwnd=%s", txt, self.hwnd)
+                return self.hwnd
+        except Exception as e:
+            logging.debug("win32gui 定位失败，转 uiautomation: %s", e)
+
+        # 2) uiautomation 兜底（加 try/except 防 COM 崩溃）
+        try:
+            for name in (self.cfg.get("window_title", ""), "ima", "IMA", "腾讯IMA", "ima.copilot"):
+                if not name:
+                    continue
+                c = auto.WindowControl(Name=name)
+                try:
+                    if c.Exists(3):
+                        self.hwnd = c.NativeWindowHandle
+                        if self.hwnd:
+                            logging.info("已定位 IMA 窗口：Name=%r hwnd=%s", c.Name, self.hwnd)
+                            return self.hwnd
+                except Exception:
+                    continue
+            for w in auto.GetRootControl().GetChildren():
+                try:
+                    n = (w.Name or "").lower()
+                    cls = (getattr(w, "ClassName", "") or "").lower()
+                    is_electron = ("chrome" in cls or "widgetwin" in cls or "electron" in cls)
+                    title_ok = (n == "ima" or n == "ima.copilot" or "ima.copilot" in n)
+                    if (is_electron and ("ima" in n or "copilot" in n)) or title_ok:
+                        self.hwnd = w.NativeWindowHandle
+                        logging.info("已定位 IMA 窗口（兜底）：Name=%r Class=%r hwnd=%s",
+                                     w.Name, cls, self.hwnd)
+                        return self.hwnd
+                except Exception:
+                    continue
+        except Exception as e:
+            logging.debug("uiautomation 兜底定位失败: %s", e)
         return None
 
     # ------------------------------------------------------------------
@@ -372,12 +420,31 @@ class IMAController:
         sx = (lw / iw) if iw else 1.0
         sy = (lh / ih) if ih else 1.0
         target = target.strip() if strip else target
-        for text, rx, ry in ocr_image(img):
-            t = text.strip() if strip else text
-            cmp = (t if case_sensitive else t.lower())
-            tgt = (target if case_sensitive else target.lower())
-            if cmp == tgt or tgt in cmp:
-                return text, rx, ry, left + int(rx * sx), top + int(ry * sy)
+        tgt = (target if case_sensitive else target.lower())
+        # 两遍匹配：
+        #  第 1 遍优先「整词精确匹配」，避免短词（如「问答」）误命中统计文字
+        #    「801浏览和问答」等长文本而被点错；
+        #  第 2 遍再退回到子串包含匹配（用于长标签 / 长知识库名）。
+        for exact in (True, False):
+            for text, rx, ry in ocr_image(img):
+                t = text.strip() if strip else text
+                cmp = (t if case_sensitive else t.lower())
+                if exact:
+                    if cmp == tgt:
+                        return text, rx, ry, left + int(rx * sx), top + int(ry * sy)
+                else:
+                    if tgt in cmp and cmp != tgt:
+                        # 子串匹配：若目标是一个很短的词（<=2 个汉字），且该词
+                        # 嵌在更长的中文 token 中（前后还有其它中文字），视为误
+                        # 命中（如「问答」∈「浏览和问答」），跳过。
+                        if len(tgt) <= 2 and re.search(r"[一-鿿]", tgt):
+                            # 检查目标在 token 中是否被其它汉字紧邻包围
+                            idx = cmp.find(tgt)
+                            before = cmp[idx - 1] if idx > 0 else ""
+                            after = cmp[idx + len(tgt)] if idx + len(tgt) < len(cmp) else ""
+                            if re.search(r"[一-鿿]", before) or re.search(r"[一-鿿]", after):
+                                continue
+                        return text, rx, ry, left + int(rx * sx), top + int(ry * sy)
         return None
 
     def _click_text(self, img, target, fallback=None, case_sensitive=False):
@@ -564,7 +631,10 @@ class IMAController:
 
     def _wait_real_answer(self, pre_text, question):
         mark("_wait_real_answer", "轮询等待回答")  # AUTO-INSTRUMENTED
-        """等待「新内容出现并稳定」，避免把旧答案当新答案。返回最终回答文本。"""
+        """等待回答生成完毕。判定策略：区域 OCR 文本已达「足够长」且连续两次
+        稳定（或已达最小等待时间），即认为回答完成。不再强求比旧内容增长
+        固定字数，避免旧答案被滚动移出区域 / 同问题重问长度相近导致的误判超时。
+        """
         start = time.time()
         last = pre_text
         stable = 0
@@ -573,24 +643,22 @@ class IMAController:
             elapsed = time.time() - start
             post = self._ocr_region_text(self.answer_left, self.top_bar_ratio,
                                          self.answer_right, self.answer_bottom)
-            # 新内容出现且足够多
-            if len(post) > len(pre_text) + 30 and len(post) >= 60:
-                if abs(len(post) - len(last)) <= 10:
+            if len(post) >= 60:
+                if abs(len(post) - len(last)) <= 15:
                     stable += 1
                 else:
                     stable = 0
                 last = post
                 if stable >= 2:
                     logging.info("[IMA] 回答内容已稳定（%.1fs）", elapsed)
-                    # 防旧答案：与上次保存的答案高度相似且问题不同 -> 视为陈旧
                     if self._is_stale_answer(post, question):
-                        logging.warning("[IMA] 检测为陈旧答案（与上轮相同），将重试。")
+                        logging.warning("[IMA] 检测为陈旧答案（与上轮不同问题相同），将重试。")
                         return None
                     return post
             else:
                 last = post
                 stable = 0
-            if elapsed >= self.answer_wait and len(post) > len(pre_text) + 20 and len(post) >= 60:
+            if elapsed >= self.answer_wait and len(post) >= 60:
                 logging.info("[IMA] 已达最小等待 %.0fs，停止等待。", self.answer_wait)
                 if self._is_stale_answer(post, question):
                     return None
@@ -600,14 +668,17 @@ class IMAController:
 
     def _is_stale_answer(self, post, question):
         mark("_is_stale_answer", "过滤旧回答")  # AUTO-INSTRUMENTED
-        prev = self.state.get("ima", {}).get("last_answer_text", "")
+        ima_state = self.state.setdefault("ima", {})
+        prev = ima_state.get("last_answer_text", "")
+        prev_q = ima_state.get("last_answer_question", "")
         if not prev:
             return False
         pn = self._norm(prev)
         qn = self._norm(question)
         cur = self._norm(post)
-        # 问题不同、但本次回答与上轮一字不差 -> 典型的"旧答案被当成新答案"卡顿
-        if pn and cur and pn == cur and qn[:6] not in pn:
+        # 仅当「回答与上轮一字不差」且「本次提问与上次不同」时才判定为陈旧，
+        # 避免同一问题重问时被误判陈旧而无限重试。
+        if pn and cur and pn == cur and qn != prev_q:
             return True
         return False
 
@@ -684,8 +755,10 @@ class IMAController:
         if answer_text is None:
             raise RuntimeError("未生成新的有效回答（可能为陈旧答案或超时）")
 
-        # 记忆答案指纹，防下次陈旧
-        self.state.setdefault("ima", {})["last_answer_text"] = answer_text
+        # 记忆答案指纹，防下次陈旧（同时记录对应问题）
+        ima_state = self.state.setdefault("ima", {})
+        ima_state["last_answer_text"] = answer_text
+        ima_state["last_answer_question"] = question
         self._save_state()
 
         # 截完整回答（滚动拼接）

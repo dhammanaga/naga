@@ -107,40 +107,83 @@ class OCRWeChatController:
             pass
 
     def find_window(self):
-        # 1) 严格按类名找（先还原再校验尺寸，兼容「微信被最小化」的情况）
-        for cls in self.WECHAT_CLASSES:
-            c = auto.WindowControl(ClassName=cls)
-            if c.Exists(3):
-                self._restore_control(c)
-                time.sleep(0.3)
-                if self._valid_wechat_rect(c):
-                    logging.info("已定位微信窗口（按类名）：Class=%r Name=%r",
-                                 cls, getattr(c, "Name", ""))
-                    self.window = c
-                    self._restore()
-                    return c
-                else:
-                    logging.debug("类名 %r 命中但窗口尺寸异常，忽略。", cls)
+        # 1) win32gui 优先：按类名精确匹配微信主窗口，最稳，绕开 uiautomation
+        #    在 Qt/Electron 窗口上偶发的 COM 崩溃（_locate 时 Exists/遍历会崩）。
+        try:
+            target_hwnd = None
 
-        # 2) 兜底：遍历所有顶层窗口，找尺寸够大且标题符合微信会话特征的窗口
-        for w in auto.GetRootControl().GetChildren():
-            try:
-                name = (w.Name or "").lower()
-                cls = (getattr(w, "ClassName", "") or "").lower()
-                # 只接受标题里明确有"微信"或"wechat"，且不是 WorkBuddy 这类工具窗口
-                if not (("微信" in name or "wechat" in name) and "ima" not in name and "workbuddy" not in name):
+            def _enum(hwnd, _):
+                nonlocal target_hwnd
+                if target_hwnd or not hwnd:
+                    return
+                try:
+                    cls = win32gui.GetClassName(hwnd)
+                except Exception:
+                    return
+                if cls in self.WECHAT_CLASSES:
+                    try:
+                        r = win32gui.GetWindowRect(hwnd)
+                        if (r[2] - r[0]) >= 600 and (r[3] - r[1]) >= 400:
+                            target_hwnd = hwnd
+                    except Exception:
+                        pass
+
+            win32gui.EnumWindows(_enum, None)
+            if target_hwnd:
+                try:
+                    ctrl = auto.ControlFromHandle(target_hwnd)
+                except Exception:
+                    ctrl = None
+                if ctrl is not None:
+                    self._restore_control(ctrl)
+                    time.sleep(0.3)
+                    logging.info("已定位微信窗口（win32gui）：Class=%r Name=%r",
+                                 win32gui.GetClassName(target_hwnd),
+                                 getattr(ctrl, "Name", ""))
+                    self.window = ctrl
+                    self._restore()
+                    return ctrl
+        except Exception as e:
+            logging.debug("win32gui 定位微信失败，转 uiautomation: %s", e)
+
+        # 2) uiautomation 兜底（整体 try/except 防 COM 崩溃）
+        try:
+            for cls in self.WECHAT_CLASSES:
+                try:
+                    c = auto.WindowControl(ClassName=cls)
+                    if c.Exists(3):
+                        self._restore_control(c)
+                        time.sleep(0.3)
+                        if self._valid_wechat_rect(c):
+                            logging.info("已定位微信窗口（按类名）：Class=%r Name=%r",
+                                         cls, getattr(c, "Name", ""))
+                            self.window = c
+                            self._restore()
+                            return c
+                        else:
+                            logging.debug("类名 %r 命中但窗口尺寸异常，忽略。", cls)
+                except Exception:
                     continue
-                self._restore_control(w)
-                time.sleep(0.3)
-                if not self._valid_wechat_rect(w):
+
+            for w in auto.GetRootControl().GetChildren():
+                try:
+                    name = (w.Name or "").lower()
+                    cls = (getattr(w, "ClassName", "") or "").lower()
+                    if not (("微信" in name or "wechat" in name) and "ima" not in name and "workbuddy" not in name):
+                        continue
+                    self._restore_control(w)
+                    time.sleep(0.3)
+                    if not self._valid_wechat_rect(w):
+                        continue
+                    logging.info("已定位微信窗口（兜底）：Name=%r Class=%r",
+                                 getattr(w, "Name", ""), getattr(w, "ClassName", ""))
+                    self.window = w
+                    self._restore()
+                    return w
+                except Exception:
                     continue
-                logging.info("已定位微信窗口（兜底）：Name=%r Class=%r",
-                             getattr(w, "Name", ""), getattr(w, "ClassName", ""))
-                self.window = w
-                self._restore()
-                return w
-            except Exception:
-                continue
+        except Exception as e:
+            logging.debug("uiautomation 兜底定位失败: %s", e)
 
         logging.error(
             "找不到微信窗口。请确认：①微信桌面端已启动并登录；②窗口未最小化；③类名为 %s 之一。"

@@ -17,6 +17,9 @@ import sys
 import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
+# 让窗口中的中文标签/日志正常显示（Windows 自带微软雅黑/黑体）
+plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "SimSun", "Arial Unicode MS"]
+plt.rcParams["axes.unicode_minus"] = False
 from matplotlib.patches import FancyBboxPatch
 from matplotlib.animation import FuncAnimation
 
@@ -145,7 +148,7 @@ def draw(ax, ax_log, state):
     logs = state.get("log", [])[-26:]
     text = "\n".join(logs) if logs else "（暂无日志，启动 wechat_ima_monitor.py 后这里会实时滚动）"
     ax_log.text(0.0, 1.0, text, fontsize=8.2, va="top", ha="left",
-                family="monospace", color="#263238",
+                color="#263238",
                 wrap=True)
 
 

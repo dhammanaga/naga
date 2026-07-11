@@ -52,6 +52,19 @@ import logging
 import urllib.request
 import urllib.error
 
+# 修复 Windows 控制台中文乱码：stdout/stderr 改 UTF-8 并切换控制台代码页
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+    try:
+        import ctypes
+        ctypes.windll.kernel32.SetConsoleOutputCP(65001)
+    except Exception:
+        pass
+
 if sys.platform != "win32":
     print("错误：本程序仅支持 Windows（需要 uiautomation）。", file=sys.stderr)
     sys.exit(2)
