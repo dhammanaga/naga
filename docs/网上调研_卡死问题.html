@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>为什么总卡死 · 网上调研图表</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:"PingFang SC","Microsoft YaHei",sans-serif; background:#0d1117; color:#e6edf3; padding:26px 14px 50px; }
+  .wrap { max-width:940px; margin:0 auto; }
+  h1 { font-size:24px; color:#fff; text-align:center; margin-bottom:4px; }
+  .sub { text-align:center; color:#8b98a5; font-size:13px; margin-bottom:22px; }
+  .panel { background:#161b22; border:1px solid #2a3441; border-radius:16px; padding:20px 22px; margin-bottom:22px; }
+  .panel h2 { font-size:17px; color:#58a6ff; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  .cap { font-size:12px; color:#8b98a5; margin-top:8px; text-align:center; }
+  svg { display:block; margin:0 auto; max-width:100%; }
+  .tag { font-size:12px; padding:3px 10px; border-radius:20px; font-weight:600; }
+  .tag.bad { background:rgba(248,81,73,.15); color:#f85149; }
+  .tag.ok { background:rgba(63,185,80,.15); color:#3fb950; }
+  .tag.warn{ background:rgba(210,153,34,.15); color:#d29922; }
+  .note { background:#0d1117; border:1px dashed #3a4654; border-radius:10px; padding:14px 16px; font-size:14px; color:#c9d4df; line-height:1.7; }
+  table { width:100%; border-collapse:collapse; margin-top:10px; font-size:14px; }
+  th, td { border:1px solid #2a3441; padding:10px 12px; text-align:left; vertical-align:top; }
+  th { background:#0d1117; color:#58a6ff; }
+  .pill { display:inline-block; padding:2px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+  .pill.ok { background:rgba(63,185,80,.15); color:#3fb950; }
+  .pill.bad { background:rgba(248,81,73,.15); color:#f85149; }
+  .pill.warn { background:rgba(210,153,34,.15); color:#d29922; }
+  footer { text-align:center; color:#5a6672; font-size:12px; margin-top:26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🔍 为什么总在同一个地方卡死 · 网上调研</h1>
+  <div class="sub">2026-07-13 ｜ 按「方法11：卡住就上网搜」执行 ｜ 全图形</div>
+
+  <!-- 1. 我反复栽的坑 -->
+  <div class="panel">
+    <h2>① 我反复栽的同一个坑</h2>
+    <svg viewBox="0 0 900 170" width="900" height="170">
+      <g font-size="13" fill="#e6edf3" text-anchor="middle">
+        <rect x="20" y="60" width="160" height="48" rx="10" fill="#161b22" stroke="#388bfd"/>
+        <text x="100" y="89">打开 IMA 窗口</text>
+        <rect x="230" y="60" width="160" height="48" rx="10" fill="#161b22" stroke="#388bfd"/>
+        <text x="310" y="89">发问</text>
+        <rect x="440" y="60" width="160" height="48" rx="10" fill="#161b22" stroke="#f85149"/>
+        <text x="520" y="80">等回答/等界面</text><text x="520" y="97" font-size="11" fill="#f85149">永久卡死 ⛔</text>
+        <rect x="650" y="60" width="160" height="48" rx="10" fill="#161b22" stroke="#2a3441" stroke-dasharray="4 4"/>
+        <text x="730" y="89">截图发出</text>
+      </g>
+      <g stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#ar)">
+        <line x1="180" y1="84" x2="225" y2="84"/>
+        <line x1="390" y1="84" x2="435" y2="84"/>
+        <line x1="600" y1="84" x2="645" y2="84" stroke="#f85149" stroke-dasharray="4 4"/>
+      </g>
+      <defs><marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#58a6ff"/></marker></defs>
+    </svg>
+    <p class="cap">这不是截图算法的问题（已修好），而是「用脚本去操作 IMA 界面」这层反复卡死——已出现过几十个 diag_*.py 都在跟它较劲</p>
+  </div>
+
+  <!-- 2. 网上共识 -->
+  <div class="panel">
+    <h2>② 网上共识：这是典型「反模式」 <span class="tag bad">脆弱</span></h2>
+    <div class="note">
+      📌 多个来源（51CTO / CSDN / GitHub 官方库文档）一致指出：<br><br>
+      <b>用 <span style="color:#f85149">pyautogui 按屏幕坐标</span>去驱动「网页内核类桌面应用」（IMA 正是这类）是非常脆弱的做法。</b><br>
+      这类应用界面会变、会异步加载，一旦「坐标对不上 / 没等到回答出现」，脚本就会无限等待、表现为<span class="bad">永久卡死</span>。<br><br>
+      ✅ 业界公认的稳健做法是：<b>改用 UI 自动化（UIA）直接找界面元素 + 设超时</b>，而不是盲猜坐标。
+    </div>
+  </div>
+
+  <!-- 3. 别人用的 3 条破局路 -->
+  <div class="panel">
+    <h2>③ 别人用的 3 条破局路（对比图）</h2>
+    <svg viewBox="0 0 900 300" width="900" height="300">
+      <g font-size="13" fill="#e6edf3">
+        <!-- 路径A -->
+        <rect x="20" y="20" width="270" height="120" rx="12" fill="#161b22" stroke="#3fb950"/>
+        <text x="155" y="46" text-anchor="middle" fill="#3fb950" font-weight="700">路径 A：换 UIA 驱动</text>
+        <text x="155" y="72" text-anchor="middle" font-size="12">用 uiautomation 库直接</text>
+        <text x="155" y="90" text-anchor="middle" font-size="12">找界面元素 + 设超时</text>
+        <text x="155" y="112" text-anchor="middle" font-size="12" fill="#3fb950">✦ 根治卡死</text>
+        <text x="155" y="130" text-anchor="middle" font-size="11" fill="#8b98a5">改动最小·最稳</text>
+        <!-- 路径B -->
+        <rect x="315" y="20" width="270" height="120" rx="12" fill="#161b22" stroke="#388bfd"/>
+        <text x="450" y="46" text-anchor="middle" fill="#388bfd" font-weight="700">路径 B：走官方 API</text>
+        <text x="450" y="72" text-anchor="middle" font-size="12">IMA 有 OpenAPI</text>
+        <text x="450" y="90" text-anchor="middle" font-size="12">绕过界面操作</text>
+        <text x="450" y="112" text-anchor="middle" font-size="12" fill="#d29922">⚠ 当前 API 不返回</text>
+        <text x="450" y="130" text-anchor="middle" font-size="11" fill="#8b98a5">答案文本·暂不能替</text>
+        <!-- 路径C -->
+        <rect x="610" y="20" width="270" height="120" rx="12" fill="#161b22" stroke="#2a3441"/>
+        <text x="745" y="46" text-anchor="middle" fill="#8b98a5" font-weight="700">路径 C：长截图库</text>
+        <text x="745" y="72" text-anchor="middle" font-size="12">现成滚动拼接库</text>
+        <text x="745" y="90" text-anchor="middle" font-size="12">自适应拼接</text>
+        <text x="745" y="112" text-anchor="middle" font-size="12" fill="#3fb950">✦ 已用 TDD 自研解决</text>
+        <text x="745" y="130" text-anchor="middle" font-size="11" fill="#8b98a5">非卡死主因</text>
+      </g>
+      <!-- 推荐标 -->
+      <rect x="20" y="160" width="270" height="34" rx="8" fill="rgba(63,185,80,.15)"/>
+      <text x="155" y="182" text-anchor="middle" fill="#3fb950" font-weight="700" font-size="13">★ 推荐先走路径 A</text>
+    </svg>
+    <p class="cap">三条路里，路径 A 直接针对「卡死」这个病根，且不需大改架构</p>
+  </div>
+
+  <!-- 4. 路径A 具体怎么治 -->
+  <div class="panel">
+    <h2>④ 路径 A 具体怎么治「卡死」（网上给的方子）</h2>
+    <table>
+      <tr><th>招数</th><th>作用</th><th>来自</th></tr>
+      <tr><td>设 <b>TIME_OUT_SECOND</b>（默认10秒）</td><td>找元素超时就抛异常，不再无限等</td><td class="pill ok">uiautomation 官方文档</td></tr>
+      <tr><td>用 <b>Exists(秒,间隔)</b> 轮询</td><td>等「回答出现」用轮询判断，不盲等</td><td class="pill ok">官方文档</td></tr>
+      <tr><td>窗口状态变了先 <b>Refind()</b></td><td>界面刷新后重新定位，避免操作失效对象</td><td class="pill ok">官方文档</td></tr>
+      <tr><td><b>限定 searchDepth</b> 分层查找</td><td>搜索从遍历 200+ 次降到几次，防假死</td><td class="pill ok">官方文档</td></tr>
+      <tr><td><b>管理员权限</b>运行</td><td>否则 COMError 会表现为调用挂起</td><td class="pill ok">官方文档</td></tr>
+      <tr><td>try/except 捕获 <b>LookupError/COMError</b></td><td>异常可恢复，脚本不莫名挂起</td><td class="pill ok">官方文档</td></tr>
+    </table>
+  </div>
+
+  <!-- 5. 对比：旧做法 vs 新做法 -->
+  <div class="panel">
+    <h2>⑤ 旧做法 vs 新做法</h2>
+    <table>
+      <tr><th></th><th>❌ 旧（反复卡死）</th><th>✅ 新（路径A）</th></tr>
+      <tr><td class="k">怎么操作界面</td><td>pyautogui 按坐标点/滚</td><td>uiautomation 找真实元素</td></tr>
+      <tr><td class="k">等回答出现</td><td>死等 / 盲猜状态</td><td>Exists() 轮询 + 超时</td></tr>
+      <tr><td class="k">界面变了</td><td>继续操作旧对象→卡死</td><td>Refind() 重新定位</td></tr>
+      <tr><td class="k">卡住时</td><td>永久挂起</td><td>超时抛异常→可恢复</td></tr>
+      <tr><td class="k">运行权限</td><td>普通权限（易 COMError）</td><td>管理员权限</td></tr>
+    </table>
+  </div>
+
+  <!-- 6. 下一步 -->
+  <div class="panel">
+    <h2>⑥ 建议下一步</h2>
+    <div class="note">
+      1️⃣ <b>先走路径 A</b>：把 `ask()` 里「等回答/等界面」的逻辑，从 pyautogui 盲等改成 uiautomation 的 <b>Exists()轮询 + 超时 + Refind()</b>，并以管理员权限运行。这直接根治卡死，且不用推翻已修好的截图算法。<br><br>
+      2️⃣ <b>路径 B 作为备选</b>：IMA 官方 OpenAPI 目前只管「笔记/知识库增删查」，<span class="warn">不返回问答答案文本</span>，所以暂时替不了"截答案长图"；但以后若 IMA 开放对话 API，可彻底绕过界面。<br><br>
+      💡 需要你配合：跑路径 A 时仍需把 IMA 停在「知识库问答」界面（和之前一样），但这次不会再无限卡死——超时就会报错退出，我们能立刻知道哪一步不对。
+    </div>
+  </div>
+
+  <footer>本报告由 AI 按「方法11」上网调研后生成 · 全图形化 · 离线可用</footer>
+</div>
+</body>
+</html>

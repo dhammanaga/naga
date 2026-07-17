@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>截图修复 · 图表报告</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:"PingFang SC","Microsoft YaHei",sans-serif; background:#0d1117; color:#e6edf3; padding:26px 14px 50px; }
+  .wrap { max-width:940px; margin:0 auto; }
+  h1 { font-size:25px; color:#fff; text-align:center; margin-bottom:4px; }
+  .sub { text-align:center; color:#8b98a5; font-size:13px; margin-bottom:24px; }
+
+  /* 状态卡片 */
+  .stat-row { display:flex; gap:14px; margin-bottom:26px; flex-wrap:wrap; }
+  .stat { flex:1; min-width:160px; background:#161b22; border:1px solid #2a3441; border-radius:14px; padding:16px; text-align:center; }
+  .stat .big { font-size:30px; font-weight:800; }
+  .stat .lab { font-size:13px; color:#8b98a5; margin-top:4px; }
+  .stat.ok { border-color:#3fb950; } .stat.ok .big { color:#3fb950; }
+  .stat.warn { border-color:#d29922; } .stat.warn .big { color:#d29922; }
+  .stat.neu { border-color:#388bfd; } .stat.neu .big { color:#388bfd; }
+
+  .panel { background:#161b22; border:1px solid #2a3441; border-radius:16px; padding:20px 22px; margin-bottom:22px; }
+  .panel h2 { font-size:17px; color:#58a6ff; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  .tag { font-size:12px; padding:3px 10px; border-radius:20px; font-weight:600; }
+  .tag.ok { background:rgba(63,185,80,.15); color:#3fb950; }
+  .tag.bad { background:rgba(248,81,73,.15); color:#f85149; }
+  .tag.warn{ background:rgba(210,153,34,.15); color:#d29922; }
+  .cap { font-size:12px; color:#8b98a5; margin-top:8px; text-align:center; }
+  svg { display:block; margin:0 auto; max-width:100%; }
+  .legend { display:flex; gap:18px; justify-content:center; flex-wrap:wrap; font-size:13px; color:#c9d4df; margin-top:10px; }
+  .legend i { display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:middle; }
+  .note { background:#0d1117; border:1px dashed #3a4654; border-radius:10px; padding:14px 16px; font-size:14px; color:#c9d4df; line-height:1.7; }
+  .grid2 { display:flex; gap:18px; flex-wrap:wrap; }
+  .grid2 > div { flex:1; min-width:260px; }
+  ul.clean { list-style:none; padding-left:0; }
+  ul.clean li { padding:7px 0; border-bottom:1px dashed #2a3441; color:#c9d4df; font-size:14px; }
+  ul.clean li:last-child { border-bottom:none; }
+  .btn { display:inline-block; padding:10px 16px; border-radius:10px; font-size:14px; font-weight:600; margin:6px 8px 0 0; }
+  .btn.a { background:#238636; color:#fff; } .btn.b { background:#1f6feb; color:#fff; }
+  footer { text-align:center; color:#5a6672; font-size:12px; margin-top:26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>📊 截图修复 · 图表报告</h1>
+  <div class="sub">2026-07-13 ｜ 微信 IMA 长回答截图监控 ｜ 零代码 · 全图形</div>
+
+  <!-- 状态总览 -->
+  <div class="stat-row">
+    <div class="stat ok"><div class="big">✓ 已修复</div><div class="lab">截图拼接算法<br>（截不全 / 重复）</div></div>
+    <div class="stat warn"><div class="big">⚠ 待处理</div><div class="lab">发问后程序卡住<br>（需你配合窗口）</div></div>
+    <div class="stat neu"><div class="big">20 条</div><div class="lab">协作规则已存档<br>AGENTS.md</div></div>
+  </div>
+
+  <!-- 1. 全流程时间线 -->
+  <div class="panel">
+    <h2>① 我做了哪些事（全流程图）</h2>
+    <svg viewBox="0 0 900 360" width="900" height="360">
+      <defs>
+        <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L8,3 L0,6 Z" fill="#58a6ff"/>
+        </marker>
+      </defs>
+      <!-- 节点 -->
+      <g font-family="PingFang SC" font-size="13" fill="#e6edf3" text-anchor="middle">
+        <!-- 行1 -->
+        <rect x="20" y="20" width="190" height="56" rx="12" fill="#161b22" stroke="#388bfd"/>
+        <text x="115" y="44">📝 写长期规则文档</text><text x="115" y="62" font-size="11" fill="#8b98a5">AGENTS.md · 20条</text>
+        <rect x="355" y="20" width="190" height="56" rx="12" fill="#161b22" stroke="#388bfd"/>
+        <text x="450" y="44">📋 先写计划再动手</text><text x="450" y="62" font-size="11" fill="#8b98a5">规矩第14条</text>
+        <rect x="690" y="20" width="190" height="56" rx="12" fill="#161b22" stroke="#388bfd"/>
+        <text x="785" y="44">💡 列4种修法选1</text><text x="785" y="62" font-size="11" fill="#8b98a5">规矩第18条</text>
+        <!-- 行2 -->
+        <rect x="690" y="150" width="190" height="56" rx="12" fill="#161b22" stroke="#388bfd"/>
+        <text x="785" y="174">🧪 先做模拟测试</text><text x="785" y="192" font-size="11" fill="#8b98a5">规矩第13条</text>
+        <rect x="355" y="150" width="190" height="56" rx="12" fill="#161b22" stroke="#3fb950"/>
+        <text x="450" y="174">🔧 改代码修复</text><text x="450" y="192" font-size="11" fill="#8b98a5">方案A落地</text>
+        <rect x="20" y="150" width="190" height="56" rx="12" fill="#161b22" stroke="#3fb950"/>
+        <text x="115" y="174">✅ 三关测试全过</text><text x="115" y="192" font-size="11" fill="#8b98a5">截图算法根治</text>
+        <!-- 行3 -->
+        <rect x="355" y="280" width="190" height="56" rx="12" fill="#161b22" stroke="#d29922"/>
+        <text x="450" y="304">🔍 发现另一问题</text><text x="450" y="322" font-size="11" fill="#8b98a5">发问卡住·待你配合</text>
+      </g>
+      <!-- 箭头 -->
+      <g stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#ar)">
+        <line x1="210" y1="48" x2="350" y2="48"/>
+        <line x1="545" y1="48" x2="685" y2="48"/>
+        <line x1="785" y1="76" x2="785" y2="148"/>
+        <line x1="690" y1="178" x2="555" y2="178"/>
+        <line x1="355" y1="178" x2="220" y2="178"/>
+        <line x1="115" y1="206" x2="115" y2="270" stroke-dasharray="4 4" opacity="0.5"/>
+        <line x1="115" y1="270" x2="350" y2="308"/>
+      </g>
+    </svg>
+    <p class="cap">箭头表示先后顺序；绿框=已完成修复，黄框=待你配合，蓝框=流程动作</p>
+  </div>
+
+  <!-- 2. 问题对比图 -->
+  <div class="panel">
+    <h2>② 问题长什么样 <span class="tag bad">两个相反的错</span></h2>
+    <div class="grid2">
+      <div>
+        <svg viewBox="0 0 280 230" width="280" height="230">
+          <!-- 手机 -->
+          <rect x="90" y="10" width="100" height="210" rx="14" fill="#0d1117" stroke="#f85149" stroke-width="2"/>
+          <rect x="100" y="22" width="80" height="40" rx="4" fill="#f85149" opacity="0.25"/>
+          <text x="140" y="46" font-size="11" fill="#f85149" text-anchor="middle">截到的</text>
+          <text x="140" y="120" font-size="10" fill="#8b98a5" text-anchor="middle">下面全丢了…</text>
+          <text x="140" y="200" font-size="11" fill="#f85149" text-anchor="middle">❌ 错误一：只截一屏</text>
+        </svg>
+      </div>
+      <div>
+        <svg viewBox="0 0 280 230" width="280" height="230">
+          <!-- 重复长条 -->
+          <rect x="120" y="10" width="40" height="200" rx="4" fill="#f85149" opacity="0.85"/>
+          <line x1="120" y1="50" x2="160" y2="50" stroke="#fff" stroke-dasharray="3 3"/>
+          <line x1="120" y1="90" x2="160" y2="90" stroke="#fff" stroke-dasharray="3 3"/>
+          <line x1="120" y1="130" x2="160" y2="130" stroke="#fff" stroke-dasharray="3 3"/>
+          <line x1="120" y1="170" x2="160" y2="170" stroke="#fff" stroke-dasharray="3 3"/>
+          <text x="140" y="222" font-size="11" fill="#f85149" text-anchor="middle">❌ 错误二：重复堆成9万px</text>
+        </svg>
+      </div>
+    </div>
+    <p class="cap">左：回答被截断；右：同一段内容被贴了 120 遍，图变得超长全是重复字</p>
+  </div>
+
+  <!-- 3. 修复前后高度柱状图 -->
+  <div class="panel">
+    <h2>③ 修复前后「图有多高」对比 <span class="tag bad">差 17 倍</span></h2>
+    <svg viewBox="0 0 900 340" width="900" height="340">
+      <!-- 坐标轴 -->
+      <line x1="70" y1="20" x2="70" y2="300" stroke="#3a4654"/>
+      <line x1="70" y1="300" x2="860" y2="300" stroke="#3a4654"/>
+      <!-- 柱1 红 -->
+      <rect x="180" y="30" width="180" height="270" rx="6" fill="#f85149"/>
+      <text x="270" y="22" font-size="13" fill="#f85149" text-anchor="middle">91213 px</text>
+      <text x="270" y="320" font-size="13" fill="#e6edf3" text-anchor="middle">❌ 修复前（鬼图）</text>
+      <!-- 柱2 绿（按真实比例≈5.8%，放大可见） -->
+      <rect x="540" y="284" width="180" height="16" rx="4" fill="#3fb950"/>
+      <text x="630" y="22" font-size="13" fill="#3fb950" text-anchor="middle">≈5276 px</text>
+      <text x="630" y="320" font-size="13" fill="#e6edf3" text-anchor="middle">✅ 修复后（正常）</text>
+      <!-- 倍数标注 -->
+      <text x="450" y="160" font-size="22" fill="#d29922" text-anchor="middle" font-weight="700">≈ 17 倍</text>
+      <line x1="360" y1="165" x2="430" y2="165" stroke="#d29922" stroke-dasharray="4 4"/>
+      <line x1="470" y1="165" x2="540" y2="165" stroke="#d29922" stroke-dasharray="4 4"/>
+    </svg>
+    <p class="cap">绿柱按真实高度比例仅约 5.8%（为可见已放大显示），修复后图高回到正常</p>
+  </div>
+
+  <!-- 4. 怎么修的：滚动补丁示意 -->
+  <div class="panel">
+    <h2>④ 怎么修的：只补「新露出的那截」</h2>
+    <svg viewBox="0 0 900 200" width="900" height="200">
+      <!-- 三屏 -->
+      <g font-size="12" fill="#e6edf3" text-anchor="middle">
+        <rect x="40" y="40" width="240" height="120" rx="8" fill="#0d1117" stroke="#388bfd"/>
+        <text x="160" y="105">第1屏（顶部）</text>
+        <rect x="330" y="40" width="240" height="120" rx="8" fill="#0d1117" stroke="#388bfd"/>
+        <text x="450" y="80">第2屏</text>
+        <rect x="450" y="40" width="120" height="120" rx="0" fill="#3fb950" opacity="0.3"/>
+        <text x="510" y="105" fill="#3fb950">新内容 d</text>
+        <rect x="620" y="40" width="240" height="120" rx="8" fill="#0d1117" stroke="#388bfd"/>
+        <text x="740" y="80">第3屏</text>
+        <rect x="740" y="40" width="120" height="120" rx="0" fill="#3fb950" opacity="0.3"/>
+        <text x="800" y="105" fill="#3fb950">新内容 d</text>
+      </g>
+      <g stroke="#3fb950" stroke-width="2" fill="none" marker-end="url(#ar)">
+        <line x1="280" y1="100" x2="325" y2="100"/>
+        <line x1="570" y1="100" x2="615" y2="100"/>
+      </g>
+      <text x="450" y="190" font-size="13" fill="#c9d4df" text-anchor="middle">每滚一屏只把绿色「新露出的 d 像素」贴上去；滚到底 d=0 → 自动停</text>
+    </svg>
+  </div>
+
+  <!-- 5. 测试结果 -->
+  <div class="panel">
+    <h2>⑤ 测试证明：3 关全过 <span class="tag ok">100% 通过</span></h2>
+    <div class="grid2">
+      <div>
+        <!-- 环形进度 -->
+        <svg viewBox="0 0 200 200" width="200" height="200">
+          <circle cx="100" cy="100" r="78" fill="none" stroke="#2a3441" stroke-width="18"/>
+          <circle cx="100" cy="100" r="78" fill="none" stroke="#3fb950" stroke-width="18"
+                  stroke-dasharray="490" stroke-dashoffset="0" transform="rotate(-90 100 100)"/>
+          <text x="100" y="95" font-size="34" fill="#3fb950" text-anchor="middle" font-weight="800">100%</text>
+          <text x="100" y="120" font-size="13" fill="#8b98a5" text-anchor="middle">测试通过率</text>
+        </svg>
+      </div>
+      <div>
+        <!-- 条形结果 -->
+        <svg viewBox="0 0 320 200" width="320" height="200">
+          <g font-size="12" fill="#e6edf3">
+            <text x="10" y="34">长回答+抖动滚动</text>
+            <rect x="10" y="42" width="250" height="16" rx="8" fill="#3fb950"/><text x="270" y="55" fill="#3fb950">PASS</text>
+            <text x="10" y="84">每步只滚12px极端抖动</text>
+            <rect x="10" y="92" width="250" height="16" rx="8" fill="#3fb950"/><text x="270" y="105" fill="#3fb950">PASS</text>
+            <text x="10" y="134">短回答(正好一屏)</text>
+            <rect x="10" y="142" width="250" height="16" rx="8" fill="#3fb950"/><text x="270" y="155" fill="#3fb950">PASS</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <p class="cap">用「假长图+故意抖动的滚动」当考试题，新算法拼出来：高度准确、无重复、无遗漏</p>
+  </div>
+
+  <!-- 6. 发现的独立问题 -->
+  <div class="panel">
+    <h2>⑥ 还发现一个「别的事」 <span class="tag warn">需你配合</span></h2>
+    <svg viewBox="0 0 900 150" width="900" height="150">
+      <g font-size="13" fill="#e6edf3" text-anchor="middle">
+        <rect x="20" y="55" width="150" height="44" rx="10" fill="#161b22" stroke="#388bfd"/>
+        <text x="95" y="82">① 打开IMA</text>
+        <rect x="230" y="55" width="150" height="44" rx="10" fill="#161b22" stroke="#388bfd"/>
+        <text x="305" y="82">② 发问</text>
+        <rect x="440" y="55" width="150" height="44" rx="10" fill="#161b22" stroke="#f85149"/>
+        <text x="515" y="74">③ 等回答</text><text x="515" y="90" font-size="11" fill="#f85149">卡在这不动</text>
+        <rect x="650" y="55" width="150" height="44" rx="10" fill="#161b22" stroke="#2a3441" stroke-dasharray="4 4"/>
+        <text x="725" y="82">④ 截图发出</text>
+      </g>
+      <g stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#ar)">
+        <line x1="170" y1="77" x2="225" y2="77"/>
+        <line x1="380" y1="77" x2="435" y2="77"/>
+        <line x1="590" y1="77" x2="645" y2="77" stroke="#f85149" stroke-dasharray="4 4"/>
+      </g>
+    </svg>
+    <div class="note">
+      ⚠️ 这不是截图问题——窗口本身能正常截图（已单独验证）。<br>
+      更可能是 IMA 你两天没动、界面状态变了，导致「回答区」不在程序预期的位置。<br>
+      💡 <b>你只需做一步</b>：把 IMA 打开、停在「知识库问答」界面，然后告诉我，我再单独跑一遍修好它。
+    </div>
+  </div>
+
+  <!-- 7. 交付物 -->
+  <div class="panel">
+    <h2>⑦ 我留下了什么</h2>
+    <ul class="clean">
+      <li>📄 <b>全局规则</b>：AGENTS.md（20条，以后都照它做）</li>
+      <li>📋 <b>计划文档</b>：docs/PLAN_screenshot_fix.md（完整计划+结果）</li>
+      <li>🔧 <b>修复后程序</b>：ima_ocr.py（截图拼接已修好、已通过测试）</li>
+      <li>🧪 <b>自动考试</b>：test_stitch.py（以后改代码会自动考，防再坏）</li>
+    </ul>
+  </div>
+
+  <!-- 8. 下一步 -->
+  <div class="panel">
+    <h2>⑧ 下一步，你选一个</h2>
+    <p style="margin-bottom:10px;color:#c9d4df">截图本身已修好，不影响你日常使用；卡住的只是「自动发问」那一步。</p>
+    <span class="btn a">1️⃣ 你把 IMA 停在问答界面 → 我重跑确认（推荐）</span>
+    <span class="btn b">2️⃣ 或我先单独修「发问卡住」</span>
+  </div>
+
+  <footer>本报告由 AI 按你的要求生成 · 全图形化 · 离线可用</footer>
+</div>
+</body>
+</html>

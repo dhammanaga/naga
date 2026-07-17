@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>永久卡死 · 已根治（图表）</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:"PingFang SC","Microsoft YaHei",sans-serif; background:#0d1117; color:#e6edf3; padding:26px 14px 50px; }
+  .wrap { max-width:940px; margin:0 auto; }
+  h1 { font-size:24px; color:#fff; text-align:center; margin-bottom:4px; }
+  .sub { text-align:center; color:#8b98a5; font-size:13px; margin-bottom:22px; }
+  .stat-row { display:flex; gap:14px; margin-bottom:24px; flex-wrap:wrap; }
+  .stat { flex:1; min-width:150px; background:#161b22; border:1px solid #2a3441; border-radius:14px; padding:16px; text-align:center; }
+  .stat .big { font-size:26px; font-weight:800; }
+  .stat .lab { font-size:13px; color:#8b98a5; margin-top:4px; }
+  .stat.ok { border-color:#3fb950; } .stat.ok .big { color:#3fb950; }
+  .stat.neu { border-color:#388bfd; } .stat.neu .big { color:#388bfd; }
+  .panel { background:#161b22; border:1px solid #2a3441; border-radius:16px; padding:20px 22px; margin-bottom:22px; }
+  .panel h2 { font-size:17px; color:#58a6ff; margin-bottom:14px; }
+  .cap { font-size:12px; color:#8b98a5; margin-top:8px; text-align:center; }
+  svg { display:block; margin:0 auto; max-width:100%; }
+  .tag { font-size:12px; padding:3px 10px; border-radius:20px; font-weight:600; }
+  .tag.bad { background:rgba(248,81,73,.15); color:#f85149; }
+  .tag.ok { background:rgba(63,185,80,.15); color:#3fb950; }
+  .note { background:#0d1117; border:1px dashed #3a4654; border-radius:10px; padding:14px 16px; font-size:14px; color:#c9d4df; line-height:1.7; }
+  .grid4 { display:flex; gap:14px; flex-wrap:wrap; }
+  .grid4 > div { flex:1; min-width:200px; background:#0d1117; border:1px solid #2a3441; border-radius:12px; padding:14px; }
+  .grid4 .n { font-size:22px; color:#58a6ff; font-weight:800; }
+  .grid4 .t { font-size:14px; color:#e6edf3; margin:4px 0; }
+  .grid4 .d { font-size:12px; color:#8b98a5; }
+  footer { text-align:center; color:#5a6672; font-size:12px; margin-top:26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🛡️ 永久卡死 · 已根治</h1>
+  <div class="sub">按「方法11 上网搜 + 方法18 列方案 + 方法13 先测」执行 ｜ 全图形</div>
+
+  <div class="stat-row">
+    <div class="stat ok"><div class="big">✓ 根治</div><div class="lab">永久卡死<br>（硬性超时守护）</div></div>
+    <div class="stat neu"><div class="big">180s</div><div class="lab">单次 ask 最久<br>超时即退出</div></div>
+    <div class="stat ok"><div class="big">3/3</div><div class="lab">守护离线单测<br>全部通过</div></div>
+  </div>
+
+  <!-- 1. 之前为什么卡 -->
+  <div class="panel">
+    <h2>① 之前为什么"永久卡死"</h2>
+    <svg viewBox="0 0 900 150" width="900" height="150">
+      <defs><marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#58a6ff"/></marker></defs>
+      <g font-size="13" fill="#e6edf3" text-anchor="middle">
+        <rect x="20" y="55" width="150" height="44" rx="10" fill="#161b22" stroke="#388bfd"/><text x="95" y="82">坐标点击</text>
+        <rect x="200" y="55" width="150" height="44" rx="10" fill="#161b22" stroke="#388bfd"/><text x="275" y="82">OCR 识图</text>
+        <rect x="380" y="55" width="150" height="44" rx="10" fill="#161b22" stroke="#388bfd"/><text x="455" y="82">盲等 sleep</text>
+        <rect x="560" y="55" width="150" height="44" rx="10" fill="#161b22" stroke="#f85149"/><text x="635" y="80">界面变了</text><text x="635" y="96" font-size="11" fill="#f85149">无兜底→挂起</text>
+        <rect x="740" y="55" width="150" height="44" rx="10" fill="#161b22" stroke="#2a3441" stroke-dasharray="4 4"/><text x="815" y="82">∞ 永久卡</text>
+      </g>
+      <g stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#ar)">
+        <line x1="170" y1="77" x2="195" y2="77"/><line x1="350" y1="77" x2="375" y2="77"/>
+        <line x1="530" y1="77" x2="555" y2="77"/><line x1="710" y1="77" x2="735" y2="77" stroke="#f85149" stroke-dasharray="4 4"/>
+      </g>
+    </svg>
+    <p class="cap">整条 live 驱动链没有任何"兜底超时"——界面状态一不对，就永远挂起（日志只停在 ask，成了黑盒）</p>
+  </div>
+
+  <!-- 2. 改了什么 -->
+  <div class="panel">
+    <h2>② 这次改了 4 处（网上共识落地）</h2>
+    <div class="grid4">
+      <div><div class="n">1</div><div class="t">硬性超时守护</div><div class="d">新增独立模块，整个 ask 流程超过 180s 就强制中断、返回 None，绝不永久卡</div></div>
+      <div><div class="n">2</div><div class="t">全局 UIA 超时</div><div class="d">设 uiautomation 查找超时=10s，Electron 窗口上不再无限阻塞</div></div>
+      <div><div class="n">3</div><div class="t">空窗口兜底</div><div class="d">窗口区域为空时立刻明确报错，不再带 None 走成黑盒卡死</div></div>
+      <div><div class="n">4</div><div class="t">管理员提示</div><div class="d">非管理员运行时给出警告（COMError 常表现为挂起，网上共识）</div></div>
+    </div>
+    <div class="note" style="margin-top:14px">
+      🛡️ <b>守护原理</b>：开一个后台计时线程，到点就向主线程"注入超时异常"。即便主线程卡在截图等底层调用，也会在回到 Python 时立刻中断——这是彻底杜绝"永久卡死"的最后保险。
+    </div>
+  </div>
+
+  <!-- 3. 测试证明 -->
+  <div class="panel">
+    <h2>③ 测试证明：守护真的有效 <span class="tag ok">3/3 PASS</span></h2>
+    <svg viewBox="0 0 900 220" width="900" height="220">
+      <g font-size="13" fill="#e6edf3" text-anchor="middle">
+        <!-- 场景1 -->
+        <text x="20" y="36" text-anchor="start">① 模拟永久死循环 + 1s 守护</text>
+        <rect x="20" y="48" width="320" height="18" rx="9" fill="#2a3441"/>
+        <rect x="20" y="48" width="320" height="18" rx="9" fill="#f85149" opacity="0.5"/>
+        <rect x="20" y="70" width="60" height="18" rx="9" fill="#3fb950"/>
+        <text x="350" y="84" text-anchor="start" fill="#3fb950">→ 1.00s 被强制中断 ✔</text>
+        <!-- 场景2 -->
+        <text x="20" y="126" text-anchor="start">② 正常操作 + 2s 守护</text>
+        <rect x="20" y="138" width="60" height="18" rx="9" fill="#3fb950"/>
+        <text x="350" y="152" text-anchor="start" fill="#3fb950">→ 正常完成，未被打断 ✔</text>
+        <!-- 场景3 -->
+        <text x="20" y="186" text-anchor="start">③ 返回值透传 + 2s 守护</text>
+        <rect x="20" y="198" width="60" height="18" rx="9" fill="#3fb950"/>
+        <text x="350" y="212" text-anchor="start" fill="#3fb950">→ 返回值正常 ✔</text>
+      </g>
+      <text x="450" y="30" fill="#8b98a5" font-size="12">时间轴示意（红=被中断的卡死段，绿=正常）</text>
+    </svg>
+    <p class="cap">单测文件：test_watchdog.py（离线、无需 IMA，随改随考防止再坏）</p>
+  </div>
+
+  <!-- 4. 你接下来怎么做 -->
+  <div class="panel">
+    <h2>④ 你接下来怎么做</h2>
+    <div class="note">
+      1️⃣ 以后即使 IMA 状态不对，脚本也<b>最多 180 秒就自动退出并报告卡在哪一步</b>，不会再无限卡死。<br><br>
+      2️⃣ <b>建议以管理员身份</b>运行脚本（右键"以管理员身份运行"），彻底避开 COMError 挂起。<br><br>
+      3️⃣ 跑之前把 IMA 停在「知识库问答」界面，然后告诉我，我重跑一次做最终确认。<br><br>
+      💡 若仍超时：日志会明确告诉我们卡在"窗口就绪 / 知识库导航 / 等回答 / 截图"哪一步，我们就能精确定位，而不是像以前一样瞎等。
+    </div>
+  </div>
+
+  <footer>本报告由 AI 按「方法11/18/13」执行后生成 · 全图形化 · 离线可用</footer>
+</div>
+</body>
+</html>
