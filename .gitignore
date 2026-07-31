@@ -31,3 +31,14 @@ _*.py
 *_err.log
 *_out.log
 @*.*
+
+# ---- Secrets / local state (NEVER upload) ----
+# PAT 为 GitHub 个人访问令牌，严禁入库
+PAT
+state.json
+*.txt
+getrects.py
+move_back.py
+restore_dock.py
+push_now.bat
+run_hidden.bat
